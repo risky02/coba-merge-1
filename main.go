@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -50,4 +51,20 @@ func main() {
 	// create output file
 	outputFilePath := os.Args[2]
 	generateOutput(outputFilePath, updatedRecords)
+}
+
+func generateOutput(outputPath string, records chan []string) {
+	outputFile, err := os.Create(outputPath)
+	failOnError(err, "failed to create output file")
+
+	writer := csv.NewWriter(outputFile)
+	defer writer.Flush()
+
+	writer.Write([]string{"Name", "Age", "Occupation"})
+
+	// proses si chan : updated record
+	for record := range records {
+		writer.Write(record)
+		failOnError(err, fmt.Sprintf("failed to write record: %v", record))
+	}
 }
